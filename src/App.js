@@ -1,23 +1,33 @@
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import Cart from "./components/Cart/Cart";
 import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
+import Notification from "./components/UI/Notification";
+import { uiActions } from "./store/ui-slice";
+import { sendCartData } from "./store/cart-slice";
+let isInitial = true;
 
 function App() {
+  const dispatch = useDispatch();
   const showCart = useSelector(state => state.ui.cartVisible);
   const cart = useSelector(state => state.cart);
+  const notification = useSelector(state => state.ui.notification);
   useEffect(() => {
-    fetch("https://react-http-4c46f-default-rtdb.firebaseio.com/cart.json", {
-      method: "PUT",
-      body: JSON.stringify(cart),
-    });
+    if (isInitial) {
+      isInitial = false;
+      return;
+    }
+    dispatch(sendCartData(cart));
   }, [cart]);
   return (
-    <Layout>
-      {showCart && <Cart />}
-      <Products />
-    </Layout>
+    <>
+      {notification && <Notification {...notification} />}
+      <Layout>
+        {showCart && <Cart />}
+        <Products />
+      </Layout>
+    </>
   );
 }
 
